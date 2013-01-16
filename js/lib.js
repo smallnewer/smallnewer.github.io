@@ -1,40 +1,120 @@
-(function  () {
-	// 一个简单的dom封装器，给dom封装一些css3转换的操作方法.
-	function $dom(selecter){
+;(function  () {
 
-		if (typeof selecter == 'string') {
-			this.dom = document.querySelectorAll(selecter);
+	var JCT = function (selecter){
+		return new JCT.prototype.init(selecter);
+	};
+	JCT.prototype = {
 
-			// 转换为真正的数组
-			this.dom = Array.prototype.slice.call(this.dom);
+		constructor : JCT,
 
-		//原生dom数组
-		}else if("length" in selecter && "nodeType" in selecter[0]){
-			this.dom = ("concat" in selecter) ? selecter : Array.prototype.slice.call(selecter);
-		}else{
-			this.dom = (!!selecter) ?[selecter] : [];
+		init : function (selecter){
+			var ret;
+			if (typeof selecter == 'string') {
+
+				ret = this.toArray(document.querySelectorAll(selecter));
+
+			//原生dom数组:$([DOMEle,DOMEle,...]) 
+			}else if(
+				this.type(selecter) == "undefined"
+				||
+				!("length" in selecter && "nodeType" in selecter[0])
+				||
+				!("nodeType" in selecter)
+				||
+				!(selecter instanceof JCT)
+			){
+
+				return null;
+
+			};
+
+			return this.makeArray(ret , this);
+		},
+
+		length : 0,
+
+		makeArray : function(arr, ctx){
+			var ret = ctx || [];
+
+			for (var i = 0; i < arr.length; i++) {
+				ret[i]=arr[i]
+			};
+			ret.length = arr.length;
+
+			return ret;
+		},
+		toArray : function(likeArr){
+			return Array.prototype.slice.call(likeArr);
 		}
-
-		this.init();
-
-		return this;
 	}
 
-	$dom.prototype.init = function() {
+	JCT.prototype.init.prototype = JCT.fn = JCT.prototype;
 
-		//css supported state
-		var temp = {};
-		this.styleState = temp;
-		temp.transition = this.prefix("transition");
-		temp.transitionDuration = this.prefix("transitionDuration");
-		temp.transform = this.prefix("transform");
+	JCT.type = JCT.fn.type = function (data){
+		return Object.prototype.toString.call(data).replace(/\[object\s|\]/gi,"").toLowerCase();
+	}
 
-		temp = null;
+	// 简单继承：
+	// 参数[deepcopy],target,options
+	// 是否深度复制，目标对象/数组，待被拷贝的对象/数组
+	JCT.extend = JCT.fn.extend = function(){
+		if (arguments.length <=0) { return ;};
+		var target = arguments[0],
+			deep = false,
+			options = arguments[1] || {};
+
+		if (typeof target == 'boolean') {
+			deep = target;
+			target = arguments[1];
+			options = arguments[2] || {};
+		}
+
+		// 如果第二个参数不正确，则根据options创建对应类型的target复制
+		if (!arguments[1]) {
+			switch (JCT.type(options)){
+				case "array":
+					target = [];
+					break;
+				case "object":
+					target = {};
+					break;
+				default:
+					return options;
+			}
+		};
 
 
-	};
+		// 浅复制
+		if (!deep) {
+			for(var i in options){
+				target[i] = options[i];
+			}
+		}else{
+			//深度复制
+			for(var i in options){
+				// array or object
+				if (JCT.type(options[i]) == "array" || JCT.type(options[i]) == "object") {
+					target[i] = JCT.extend(deep, null, options[i]);
+				}else{
+					target[i] = options[i];
+				}
+			}
+		}
 
-	$dom.prototype.profix = function(proname) {
+		return target;
+	}
+
+	JCT.fn.each = function(callback, ctx){
+		ctx = ctx || this;
+		for (var i = 0; i < this.length; i++) {
+			callback.call(ctx, this[i], i, this);
+		};
+	}
+
+	//css supported pre
+
+
+	var profix = function(proname) {
 		// float fix
 		if (proname.toLowerCase() == "float") {
 			proname = ("cssFloat" in document.body.style) ? "cssFloat" : "styleFloat";
@@ -76,63 +156,55 @@
 		return "";
 	};
 
-	$dom.prototype.prefix = function(style) {
-		this.prefix.style = (!!this.prefix.style) ? this.prefix.style : document.createElement("div").style ;
 
-		var tests = ["","o","O","MS","ms","webkit","moz","MOZ","Moz","WebKit","Webkit"];
-		var style1 = style.charAt(0).toUpperCase() + style.substr(1);//第一字母大写
-		style = style.charAt(0).toLowerCase() + style.substr(1);//第一字母小写
+	JCT.supported = JCT.fn.supported = (function(){
+		var preList = ["transform","transition","transitionDuration"];
+		var ret = {};
 
-		var pre = ""
-		for (var i = 0; i < tests.length; i++) {
-			pre = tests[i] + style;
-			if (pre in this.prefix.style) {
-				return pre;
-			};
-			pre = tests[i] + style1;
-			if (pre in this.prefix.style) {
-				return pre;
-			};
+		for (var i = 0; i < preList.length; i++) {
+			ret[preList[i]] = prefix(preList[i]);
 		};
 
-		return "";
-	};
+		return ret;
+	})();
+
+	window.JCT = JCT
 
 	// 设置css动画持续时间
-	$dom.prototype.transitionTime = MulPage.prototype.transitionDuration = function(time) {
+	JCT.fn.transitionTime = JCT.fn.transitionDuration = function(time) {
 
-		var proname = this.styleState.transitionDuration;
+		var proname = JCT.supported.transitionDuration;
 
 		return (arguments.length > 0 ) ? this.style(proname, time) : this.style(proname);
 	};
 
 	// 通用的style方法，设置或获取
-	$dom.prototype.style = function(proname, value) {
-		proname = this.prefix(this.profix(proname));
+	JCT.fn.style = function(proname, value) {
+		proname = prefix(profix(proname));
 
 		if (arguments.length>1) {
 
-			this.dom.forEach(function(key,index,arr){
+			this.each(function(key,index,arr){console.log(arr)
 				arr[index].style[proname] = value;
 			});
 
 			return this;
 		};
 
-		var cstyle = this.dom.length && getComputedStyle(this.dom[0], null);
+		var cstyle = this.length && getComputedStyle(this[0], null);
 
-		return (cstyle.length) ? cstyle[proname] : this.dom[0].style[proname];
+		return (cstyle.length) ? cstyle[proname] : this[0].style[proname];
 	};
 	// 设置css transform
-	$dom.prototype.transform = function(value) {
-		var proname = this.styleState.transform;
+	JCT.fn.transform = function(value) {
+		var proname = JCT.supported.transform;
 
 		return (arguments.length > 0 ) ? this.style(proname, value) : this.style(proname);
 	};
 
 	// 清除transfrom设置
-	$dom.prototype.clearTransform = function() {
-		return this.style(this.styleState.transform , "");
+	JCT.fn.clearTransform = function() {
+		return this.style(JCT.supported.transform , "");
 	};
 
 	var _transPros = {
@@ -202,7 +274,7 @@
 		var fixInd = key.length > 1 ? key[1] : -2;
 		key = key[0];
 		var style = null;
-		ctx.dom.forEach(function(k, i ){
+		ctx.each(function(k, i ){
 			__setTransformPro(key, value, k);
 		});
 
@@ -211,7 +283,7 @@
 	}
 	// 得到rotate值,如无，则默认返回Z轴，如都无，返回0
 	// value => number  设置rotateZ的角度值，
-	$dom.prototype.rotate = function(value){
+	JCT.fn.rotate = function(value){
 		
 		if (arguments.length >= 1) {
 			//setter
@@ -225,7 +297,7 @@
 
 	}
 
-	$dom.prototype.rotateX = function(value){
+	JCT.fn.rotateX = function(value){
 		if (arguments.length >= 1) {
 			//setter
 			_setTransformPro("rotateX", (!isNaN(value-0)) ? value + 'deg' : value, this);
@@ -236,7 +308,7 @@
 		return this.getTransformState("rotateX");
 	}
 
-	$dom.prototype.rotateY = function(value){
+	JCT.fn.rotateY = function(value){
 		if (arguments.length >= 1) {
 			//setter
 			_setTransformPro("rotateY", (!isNaN(value-0)) ? value + 'deg' : value, this);
@@ -247,7 +319,7 @@
 		return this.getTransformState("rotateY");
 	}
 
-	$dom.prototype.rotateZ = function(value){
+	JCT.fn.rotateZ = function(value){
 		if (arguments.length >= 1) {
 			//setter
 			_setTransformPro("rotateZ", (!isNaN(value-0)) ? value + 'deg' : value, this);
@@ -258,7 +330,7 @@
 		return this.getTransformState("rotateZ");
 	}
 
-	$dom.prototype.translateX = function(value){
+	JCT.fn.translateX = function(value){
 		if (arguments.length >= 1) {
 			//setter
 			_setTransformPro("translateX", (!isNaN(value-0) && (value+"").indexOf('%')==-1) ? value + 'px' : value, this);
@@ -269,7 +341,7 @@
 		return this.getTransformState("translateX");
 	}
 
-	$dom.prototype.translateY = function(value){
+	JCT.fn.translateY = function(value){
 		if (arguments.length >= 1) {
 			//setter
 			_setTransformPro("translateY", (!isNaN(value-0) && (value+"").indexOf('%')==-1) ? value + 'px' : value, this);
@@ -280,7 +352,7 @@
 		return this.getTransformState("translateY");
 	}
 
-	$dom.prototype.translateZ = function(value){
+	JCT.fn.translateZ = function(value){
 		if (arguments.length >= 1) {
 			//setter
 			_setTransformPro("translateZ", (!isNaN(value-0) && (value+"").indexOf('%')==-1) ? value + 'px' : value, this);
@@ -291,7 +363,7 @@
 		return this.getTransformState("translateZ");
 	}
 
-	$dom.prototype.translate = function(x, y){
+	JCT.fn.translate = function(x, y){
 		if (arguments.length == 2) {
 			return this.translateX(x).translateY(y);	
 		};
@@ -312,7 +384,7 @@
 	}
 
 	//没找到的属性，去找相关属性
-	$dom.prototype._getFixTransformState = function(proname){
+	JCT.fn._getFixTransformState = function(proname){
 		var tmpp = null;
 		switch (proname){
 			// rotateZ取不到，则取rotate,
@@ -377,12 +449,12 @@
 	// 0:相关属性被设置为0（包括默认设置）
 	// null:相关属性没有被书写
 	// string：相关属性被设置成的值
-	$dom.prototype.getTransformState = function(proname){
+	JCT.fn.getTransformState = function(proname){
 		
 		// 只能支持从标签.style中获取，getComputedStyle获取到的是矩阵，无法倒推出角度。
-		if (this.dom.length ==0) {return 0};
+		if (this.length ==0) {return 0};
 
-		var text = this.dom[0].style[this.styleState.transform];
+		var text = this[0].style[JCT.supported.transform];
 
 		var reg1 = new RegExp(proname+'\\([^\\)]*\\)','gi');
 		var arr = text.match(reg1);
@@ -417,7 +489,7 @@
 
 
 	window.$$=function(s){
-		return new $dom(s)
+		return new JCT(s)
 	};
 	window.a = $$('.con')
 	a.style("-webkit-transform","rotate(30deg) rotateX(80deg)  skew(30deg,40deg)translate(300px) translateZ(0px) scale(1.2) scale(1.3,1.1)")
@@ -438,7 +510,7 @@
 		var _this = this;
 		document.onclick = function (){
 			_this.setTransform(_this._con , "translate(300px)");
-			_this._con.style[_this.styleState.transform] = "translate(300px)"
+			_this._con.style[_JCT.supported.transform] = "translate(300px)"
 		}
 	};
 
