@@ -427,7 +427,8 @@ loadAll(['left.gif','right.gif', 'face.gif', 'mouth.gif', 'bg.gif'], function() 
   var leftBtn = new Image();
   leftBtn.src = "locoroco/left.gif"
   leftBtn.t = null;
-  leftBtn.onmousedown = leftBtn.ontouchstart = function() {
+  leftBtn.onmousedown = leftBtn.ontouchstart = function(ev) {
+    ev.stopPropagation();
     clearInterval(this.t)
     this.t = setInterval(function() {
       b.goLeft();
@@ -442,7 +443,8 @@ loadAll(['left.gif','right.gif', 'face.gif', 'mouth.gif', 'bg.gif'], function() 
   var leftBtn = new Image();
   leftBtn.src = "locoroco/right.gif"
   leftBtn.t = null;
-  leftBtn.onmousedown = leftBtn.ontouchstart = function() {
+  leftBtn.onmousedown = leftBtn.ontouchstart = function(ev) {
+    ev.stopPropagation();
     clearInterval(this.t)
     this.t = setInterval(function() {
       b.goRight();
@@ -457,7 +459,8 @@ loadAll(['left.gif','right.gif', 'face.gif', 'mouth.gif', 'bg.gif'], function() 
   var leftBtn = new Image();
   leftBtn.src = "locoroco/right.gif"
   leftBtn.t = null;
-  leftBtn.onmousedown = leftBtn.ontouchstart = function() {
+  leftBtn.onmousedown = leftBtn.ontouchstart = function(ev) {
+    ev.stopPropagation();
     clearInterval(this.t)
     var a = 0;
     this.t = setInterval(function() {
