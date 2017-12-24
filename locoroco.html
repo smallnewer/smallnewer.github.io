@@ -226,6 +226,7 @@
         canvas.width = canvas.width;
         
         ctx.save();
+        ctx.fillStyle = "#e4e0c4"
         ctx.translate(-this.viewport.x, -this.viewport.y)
         // ctx.scale(0.5, 0.5)
         ctx.drawImage(this.bg, 0, 0)
@@ -251,8 +252,8 @@
         ctx.translate(this.centerNode.position.x, this.centerNode.position.y)
         ctx.rotate(this.getDeg() * Math.PI/ 180);
         // ctx.fillRect(  p.x,   p.y, 10, 10)
-        ctx.drawImage(this.face, p.x, p.y, this.face.width, this.face.height)
-        ctx.drawImage(this.mouth, -this.mouth.width / 2, 10, this.mouth.width, this.mouth.height)
+        ctx.drawImage(this.face, -this.face.width / 1.5, -30, this.face.width * 1.5, this.face.height * 1.5)
+        ctx.drawImage(this.mouth, -this.mouth.width / 1.5, 10, this.mouth.width * 1.5, this.mouth.height * 1.5)
         ctx.restore();
         
       }
@@ -422,10 +423,9 @@ function loadAll(arr, cb) {
     
 }
 
-loadAll(['left.gif','right.gif', 'face.gif', 'mouth.gif', 'bg.gif'], function() {
+loadAll(['face.gif', 'mouth.gif', 'bg.gif'], function() {
   Example.mixed();
-  var leftBtn = new Image();
-  leftBtn.src = "locoroco/left.gif"
+  var leftBtn = document.createElement("div")
   leftBtn.t = null;
   leftBtn.onmousedown = leftBtn.ontouchstart = function(ev) {
     ev.stopPropagation();
@@ -438,10 +438,12 @@ loadAll(['left.gif','right.gif', 'face.gif', 'mouth.gif', 'bg.gif'], function() 
     clearInterval(this.t)
     // b.goLeft(0);
   }.bind(leftBtn)
-  leftBtn.style.cssText="position:absolute;left:10px;bottom:10px;"
+  leftBtn.style.cssText="position:absolute;left:10px;bottom:10px;background:url(locoroco/left.png) 0 0 no-repeat;width:44px;height:44px;"
   document.body.appendChild(leftBtn)
-  var leftBtn = new Image();
-  leftBtn.src = "locoroco/right.gif"
+  var leftBtn = document.createElement("div")
+  leftBtn.style.background = "url(locoroco/right.gif)"
+  leftBtn.style.width = "44px"
+  leftBtn.style.height = "44px"
   leftBtn.t = null;
   leftBtn.onmousedown = leftBtn.ontouchstart = function(ev) {
     ev.stopPropagation();
@@ -454,10 +456,9 @@ loadAll(['left.gif','right.gif', 'face.gif', 'mouth.gif', 'bg.gif'], function() 
     clearInterval(this.t)
     // b.goRight(0);
   }.bind(leftBtn)
-  leftBtn.style.cssText="position:absolute;right:10px;bottom:10px;"
+  leftBtn.style.cssText="position:absolute;right:10px;bottom:10px;transform:rotate(180deg);background:url(locoroco/left.png) 0 0 no-repeat;width:44px;height:44px;"
   document.body.appendChild(leftBtn)
-  var leftBtn = new Image();
-  leftBtn.src = "locoroco/right.gif"
+  var leftBtn = document.createElement("div")
   leftBtn.t = null;
   leftBtn.onmousedown = leftBtn.ontouchstart = function(ev) {
     ev.stopPropagation();
@@ -477,16 +478,18 @@ loadAll(['left.gif','right.gif', 'face.gif', 'mouth.gif', 'bg.gif'], function() 
     clearInterval(this.t)
     // b.goRight(0);
   }.bind(leftBtn)
-  leftBtn.style.cssText="position:absolute;right:10px;bottom:60px;transform:rotate(-90deg);"
+  leftBtn.style.cssText="position:absolute;right:10px;bottom:60px;transform:rotate(90deg);background:url(locoroco/left.png) 0 0 no-repeat;width:44px;height:44px;"
   document.body.appendChild(leftBtn)
   var audio = new Audio();
   audio.autoplay = true;
   audio.src = "locoroco/bg.mp3"
   audio.play();
+  document.addEventListener('touchstart', function(ev) {
+    audio.paused &&audio.play();
+    ev.preventDefault();
+  }, true)
 });
-document.addEventListener('touchstart', function(ev) {
-  ev.preventDefault();
-}, true)
+  
 
 
 </script>
