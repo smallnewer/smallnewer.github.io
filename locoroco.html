@@ -476,9 +476,6 @@ loadAll(['face.gif', 'mouth.gif', 'bg.gif'], function() {
   leftBtn.style.cssText="position:absolute;left:10px;bottom:10px;background:url(locoroco/left.png) 0 0 no-repeat;width:44px;height:44px;"
   document.body.appendChild(leftBtn)
   var leftBtn = document.createElement("div")
-  leftBtn.style.background = "url(locoroco/right.gif)"
-  leftBtn.style.width = "44px"
-  leftBtn.style.height = "44px"
   leftBtn.t = null;
   leftBtn.onmousedown = leftBtn.ontouchstart = function(ev) {
     ev.stopPropagation();
