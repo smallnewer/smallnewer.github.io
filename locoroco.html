@@ -461,11 +461,15 @@ loadAll(['left.gif','right.gif', 'face.gif', 'mouth.gif', 'bg.gif'], function() 
   leftBtn.t = null;
   leftBtn.onmousedown = leftBtn.ontouchstart = function(ev) {
     ev.stopPropagation();
+    if (b.centerNode.position.y < b.viewport.height - 30 - 30) {
+      console.log(33)
+      return
+    }
     clearInterval(this.t)
     var a = 0;
     this.t = setInterval(function() {
       a++;
-      if (a >= 5) {clearInterval(this.t)}
+      if (a >= 15) {clearInterval(this.t)}
       b.goUp();
     }.bind(this),  16)
   }.bind(leftBtn)
