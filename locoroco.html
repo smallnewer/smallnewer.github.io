@@ -1,0 +1,484 @@
+<!doctype html>
+<html>
+<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+<style>
+    body {
+        font-family: Monospace;
+        background-color: #f0f0f0;
+        margin: 0;
+        /*overflow: hidden;*/
+    }
+    /*canvas{
+      width: 500px;
+      height: 500px;
+    }*/
+</style>
+<script type="text/javascript" src="./decomp.min.js"></script>
+<script src="./matter-dev.js"></script>
+
+<body>
+<script type="text/javascript">
+  var Example = Example || {};
+  var wallPoints = [{"x":0,"y":140},{"x":61,"y":278},{"x":166,"y":353},{"x":330,"y":271},{"x":570,"y":258},{"x":825,"y":388},{"x":1193,"y":704},{"x":1410,"y":548},{"x":1178,"y":407},{"x":1240,"y":212},{"x":1582,"y":232},{"x":1721,"y":556},{"x":1604,"y":855},{"x":1271,"y":1018},{"x":840,"y":1016},{"x":735,"y":1014},{"x":737,"y":1892},{"x":806,"y":1956},{"x":1043,"y":1954},{"x":1104,"y":2045},{"x":1066,"y":2101},{"x":1017,"y":2111},{"x":972,"y":2096},{"x":950,"y":2064},{"x":938,"y":2046},{"x":921,"y":2035},{"x":791,"y":2036},{"x":763,"y":2049},{"x":747,"y":2076},{"x":737,"y":2115},{"x":739,"y":2689},{"x":745,"y":2721},{"x":761,"y":2736},{"x":781,"y":2747},{"x":1208,"y":2751},{"x":1241,"y":2732},{"x":1280,"y":2686},{"x":1328,"y":2678},{"x":1372,"y":2696},{"x":1393,"y":2762},{"x":1373,"y":2808},{"x":1338,"y":2830},{"x":1281,"y":2832},{"x":902,"y":2836},{"x":894,"y":2933},{"x":871,"y":2971},{"x":844,"y":2984},{"x":807,"y":2986},{"x":777,"y":2985},{"x":735,"y":2976},{"x":710,"y":2983},{"x":700,"y":2998},{"x":692,"y":3028},{"x":682,"y":3071},{"x":679,"y":3095},{"x":688,"y":3136},{"x":709,"y":3188},{"x":732,"y":3222},{"x":767,"y":3256},{"x":797,"y":3304},{"x":813,"y":3359},{"x":830,"y":3392},{"x":879,"y":3414},{"x":942,"y":3416},{"x":982,"y":3416},{"x":1068,"y":3414},{"x":1161,"y":3415},{"x":1194,"y":3410},{"x":1217,"y":3402},{"x":1250,"y":3380},{"x":1275,"y":3361},{"x":1332,"y":3301},{"x":1432,"y":3228},{"x":1549,"y":3174},{"x":1642,"y":3151},{"x":1604,"y":3158},{"x":1702,"y":3137},{"x":1861,"y":3135},{"x":2112,"y":3198},{"x":2342,"y":3175},{"x":2454,"y":3186},{"x":2548,"y":3221},{"x":2781,"y":3289},{"x":2952,"y":3301},{"x":3159,"y":3269},{"x":3303,"y":3198},{"x":3403,"y":3110},{"x":3481,"y":3008},{"x":3584,"y":2764},{"x":3648,"y":2355},{"x":3651,"y":2202},{"x":3685,"y":2137},{"x":3721,"y":2103},{"x":3726,"y":2094},{"x":3736,"y":2063},{"x":3734,"y":1875},{"x":3697,"y":1844},{"x":3223,"y":1875},{"x":3192,"y":1887},{"x":3171,"y":1917},{"x":3125,"y":1949},{"x":3055,"y":1928},{"x":3034,"y":1886},{"x":3059,"y":1819},{"x":3112,"y":1798},{"x":3298,"y":1788},{"x":3647,"y":1762},{"x":3709,"y":1734},{"x":3731,"y":1697},{"x":3730,"y":903},{"x":3763,"y":781},{"x":3772,"y":714},{"x":3743,"y":650},{"x":3681,"y":631},{"x":3632,"y":652},{"x":3596,"y":712},{"x":3625,"y":770},{"x":3661,"y":817},{"x":3633,"y":879},{"x":3527,"y":885},{"x":3430,"y":831},{"x":3381,"y":683},{"x":3411,"y":553},{"x":3536,"y":405},{"x":3667,"y":345},{"x":3900,"y":321},{"x":4240,"y":450},{"x":4385,"y":572},{"x":4477,"y":752},{"x":4461,"y":4237},{"x":3,"y":4236},{"x":0,"y":207},{"x":0,"y":145}];
+  var wallPoints = [{"x":811,"y":3366},{"x":837,"y":3399},{"x":930,"y":3418},{"x":1192,"y":3412},{"x":1235,"y":3633},{"x":788,"y":3646},{"x":795,"y":3425}]
+  // var wallPoints = [{x:0, y:0}, {x: 200, y:0}, { x: 200, y:200}, {x:0, y: 200}]
+  Example.mixed = function() {
+    var Engine = Matter.Engine,
+        Render = Matter.Render,
+        Runner = Matter.Runner,
+        Composites = Matter.Composites,
+        Common = Matter.Common,
+        Constraint = Matter.Constraint,
+        MouseConstraint = Matter.MouseConstraint,
+        Mouse = Matter.Mouse,
+        World = Matter.World,
+        Bodies = Matter.Bodies;
+
+    var WORLD_WIDTH = 1136;
+    var WORLD_HEIGHT = 1032;
+    class loco {
+      constructor (x, y) {
+        this.color = "red";
+        this.points = [];
+        this.init(x, y)
+
+        this.canvas = document.createElement('canvas')
+        this.canvas.width = window.innerWidth;
+        this.canvas.height =  window.innerHeight;
+        this.ctx = this.canvas.getContext('2d');
+        document.body.appendChild(this.canvas)
+
+        this.viewport = {x : 0, y: 0, width: this.canvas.width, height: this.canvas.height}
+
+        this.face = RES['face.gif']
+        this.mouth = RES['mouth.gif']
+        this.bg = RES['bg.gif']
+      }
+
+      init (x, y) {
+        var arr = [];
+        this.centerNode = Bodies.circle(x, y, 30);
+        arr.push(this.centerNode);
+        this.centerNode.mass = 600
+        this.points.push(this.centerNode)
+
+        var num = 13;
+        var stiffness = 0.01;
+        var _loc5_ = 2 * Math.PI / num;
+        var radius = 30 + 7 +25;
+        var last = null;
+        var last_x = 0;
+        var last_y = 0;
+        var first = null;
+        var first_x = 0;
+        var first_y = 0;
+        for (var i = 0; i < num; i++) {
+          var r = Math.PI * 2 / 360 * i;
+          var r = i * _loc5_ - 0.5 * Math.PI;
+          var _x = radius * Math.cos(r) + x;
+          var _y = radius * Math.sin(r) + y;
+          var tmp = Bodies.circle(_x, _y, 7)
+          tmp.mass = 300
+          arr.push(tmp)
+          this.points.push(tmp)
+          if (i==0) {
+            first = tmp;
+            first_x = _x;
+            first_y = _y;
+          }
+
+          var len = 1 * Math.sqrt(Math.pow(x - _x, 2) + Math.pow(y - _y, 2))
+          console.log(len)
+          var constraint = Constraint.create({
+              bodyA: this.centerNode,
+              bodyB: tmp,
+              length: len,
+              stiffness: 0.08,
+              damping: 0.01
+          });
+
+          arr.push(constraint)
+
+          if (last) {
+            var len = 1 * Math.sqrt(Math.pow(last_x - _x, 2) + Math.pow(last_y - _y, 2))
+            
+            var constraint = Constraint.create({
+                bodyA: last,
+                bodyB: tmp,
+                length: len,
+                stiffness: 0.5,
+                damping: 1
+            });
+            arr.push(constraint)
+          }
+          last = tmp;
+          last_x = _x;
+          last_y = _y;
+        }
+        window.qq=last
+
+        if (last && first && last !== first) {
+          var len = 1 * Math.sqrt(Math.pow(last_x - first_x, 2) + Math.pow(last_y - first_y, 2))
+          var constraint = Constraint.create({
+              bodyA: first,
+              bodyB: last,
+              length: len,
+              stiffness: 0.5,
+              damping: 1
+          });
+          arr.push(constraint)
+        }
+
+        this.bodies = arr;
+      }
+
+      getPoints () {
+        return this.points;
+      }
+
+      getBodies () {
+        return this.bodies
+      }
+
+      getDeg () {
+        var p = this.points[1];
+        var mx = p.position.x;
+        var my = p.position.y;
+        var px = this.centerNode.position.x;
+        var py = this.centerNode.position.y;
+        var x = Math.abs(px-mx);
+        var y = Math.abs(py-my);
+        var z = Math.sqrt(Math.pow(x,2)+Math.pow(y,2));
+        var cos = y/z;
+        var radina = Math.acos(cos);
+        var angle = Math.floor(180/(Math.PI/radina));
+
+        if(mx>px&&my>py){
+            angle = 180 - angle;
+        }
+        if(mx==px&&my>py){
+            angle = 180;
+        }
+        if(mx>px&&my==py){
+            angle = 90;
+        }
+        if(mx<px&&my>py){
+            angle = 180+angle;
+        }
+        if(mx<px&&my==py){
+            angle = 270;
+        }
+        if(mx<px&&my<py){
+            angle = 360 - angle;
+        }
+        return angle;
+      }
+
+      getFaceXY () {
+        var deg = this.getDeg();
+        var p = {x : -this.face.width / 2, y: -30}
+        return p;
+      }
+
+      reViewport () {
+        var l = this.centerNode.position.x - this.viewport.width / 2;
+        var r = this.centerNode.position.x + this.viewport.width / 2;
+        var t = this.centerNode.position.y - this.viewport.height / 2;
+        var b = this.centerNode.position.y + this.viewport.height / 2;
+        if (l < 0) {
+          l = 0;
+          r = l + this.viewport.width;
+        }
+        if (r > WORLD_WIDTH) {
+          r = WORLD_WIDTH;
+          l = WORLD_WIDTH - this.viewport.width;
+        }
+        if (t < 0) {
+          t = 0;
+          b = t + this.viewport.height;
+        }
+        if (b > WORLD_HEIGHT) {
+          b = WORLD_HEIGHT
+          t = b - this.viewport.height;
+        }
+        this.viewport.x = l;
+        this.viewport.y = t;
+        // console.log(this.viewport.y)
+      }
+
+
+      render () {
+        if (LEFT_PRESS) {
+          b.goLeft();
+        }
+        if (RIGHT_PRESS) {
+          b.goRight();
+        }
+        if (UP_PRESS) {
+          b.goUp();
+        }
+        requestAnimationFrame(this.render.bind(this))
+
+        this.reViewport();
+
+        var canvas = this.canvas;
+        var ctx = this.ctx;
+        canvas.width = canvas.width;
+        
+        ctx.save();
+        ctx.translate(-this.viewport.x, -this.viewport.y)
+        // ctx.scale(0.5, 0.5)
+        ctx.drawImage(this.bg, 0, 0)
+        ctx.beginPath();
+        var arr = b.getPoints().slice(1);
+        ctx.moveTo(arr[0].position.x, arr[0].position.y);
+        
+        for (var i = 0; i < arr.length + 1; i++) {
+          var tmp = arr[i % arr.length]
+          if (tmp !== b.centerNode) {
+            var next = arr[(i + 1) % arr.length]
+            // console.log((i + 1) % arr.length)
+            var _loc2_ = 0.5 * (tmp.position.x + next.position.x);
+            var _loc3_ = 0.5 * (tmp.position.y + next.position.y);
+            ctx.quadraticCurveTo(tmp.position.x, tmp.position.y, _loc2_, _loc3_)
+          }
+        }
+        ctx.closePath();
+        ctx.fill();
+
+        var p = this.getFaceXY();
+
+        ctx.translate(this.centerNode.position.x, this.centerNode.position.y)
+        ctx.rotate(this.getDeg() * Math.PI/ 180);
+        // ctx.fillRect(  p.x,   p.y, 10, 10)
+        ctx.drawImage(this.face, p.x, p.y, this.face.width, this.face.height)
+        ctx.drawImage(this.mouth, -this.mouth.width / 2, 10, this.mouth.width, this.mouth.height)
+        ctx.restore();
+        
+      }
+
+      goLeft (val) {
+        this.centerNode.force.x = val === 0 ? 0 : -0.3;
+
+      }
+      goRight (val) {
+        this.centerNode.force.x = val === 0 ? 0 : 0.3;
+      }
+
+      goUp (val) {
+        if (this.centerNode.position.y < WORLD_HEIGHT *0.3) {return}
+        this.centerNode.force.y = val === 0 ? 0 : -2;
+        for (var i = 0; i < this.points.length; i++) {
+          this.points[i].force.y = val === 0 ? 0 : -2
+        }
+      }
+
+
+    }
+
+    var LEFT_PRESS = false;
+    var RIGHT_PRESS = false;
+    var UP_PRESS = false;
+
+    
+
+    window.addEventListener('keydown', function(ev) {console.log(ev.keyCode)
+      if (ev.keyCode === 37) {
+        LEFT_PRESS = true;
+      }else if (ev.keyCode === 38) {
+        UP_PRESS = true;
+      }else if (ev.keyCode === 39) {
+        RIGHT_PRESS = true;
+      }
+    })
+
+    window.addEventListener('keyup', function(ev) {
+      LEFT_PRESS = false;
+      RIGHT_PRESS = false;
+      UP_PRESS = false;
+    })
+
+    // create engine
+    var engine = Engine.create(),
+        world = engine.world;
+
+    // create renderer
+    var render;
+    // var render = Render.create({
+    //     element: document.body,
+    //     engine: engine,
+    //     options: {
+    //         width: WORLD_WIDTH,
+    //         height: WORLD_HEIGHT,
+    //         showAngleIndicator: true,
+    //     }
+    // });
+
+    // Render.run(render);
+
+    // create runner
+    var runner = Runner.create();
+    Runner.run(runner, engine);
+
+    window.b = new loco(850, 110);;
+    requestAnimationFrame(b.render.bind(b))
+
+    var centerNode = Bodies.circle(150, 150, 20);
+
+    var bodyA = Bodies.polygon(120, 20, 10, 5, { chamfer: {radius: 2} })
+    var bodyB = Bodies.polygon(300, 20, 10, 5, { chamfer: {radius: 2} })
+    var constraint = Constraint.create({
+        bodyA: bodyA,
+        bodyB: bodyB,
+        length: 50,
+        stiffness: 0.5,
+        damping: 0.01
+    });
+
+
+    World.add(world, b.getBodies());
+
+    World.add(world, [
+        // walls
+        Bodies.rectangle(WORLD_WIDTH / 2, 0, WORLD_WIDTH, 50, { isStatic: true }),
+        Bodies.rectangle(WORLD_WIDTH / 2, WORLD_HEIGHT, 5000, 50, { isStatic: true }),
+        Bodies.rectangle(0, WORLD_HEIGHT/2, 50, 5000, { isStatic: true }),
+        Bodies.rectangle(WORLD_WIDTH, WORLD_HEIGHT/2, 50, 5000, { isStatic: true }),
+        // tmp
+    ]);
+
+    // // World.add(world, tmp)
+
+    // var star = Matter.Vertices.fromPath('50 0 63 38 100 38 69 59 82 100 50 75 18 100 31 59 0 38 37 38')
+    // World.add(world, Bodies.fromVertices(550, 200, star, { isStatic: true }))
+
+
+    // var tmp = Bodies.rectangle(WORLD_WIDTH / 2, WORLD_HEIGHT-1008+100, WORLD_WIDTH, 50, { isStatic: true })
+    // window.cc = tmp
+
+    // World.add(world, tmp)
+
+    // var star = Matter.Vertices.fromPath('50 0 63 38 100 38 69 59 82 100 50 75 18 100 31 59 0 38 37 38')
+    // World.add(world, Bodies.fromVertices(550, 200, star, { isStatic: true }))
+
+
+
+    // add mouse control
+    if (render) {
+      var mouse = Mouse.create(render.canvas),
+          mouseConstraint = MouseConstraint.create(engine, {
+              mouse: mouse,
+              constraint: {
+                  stiffness: 0.2,
+                  render: {
+                      visible: false
+                  }
+              }
+          });
+
+      World.add(world, mouseConstraint);
+
+      // keep the mouse in sync with rendering
+      render.mouse = mouse;
+
+      // fit the render viewport to the scene
+      Render.lookAt(render, {
+          min: { x: 0, y: 0 },
+          max: { x: WORLD_WIDTH, y: WORLD_HEIGHT }
+      });
+    }
+      
+
+    // context for MatterTools.Demo
+    return {
+        engine: engine,
+        runner: runner,
+        // render: render,
+        // canvas: render.canvas,
+        stop: function() {
+            Matter.Render.stop(render);
+            Matter.Runner.stop(runner);
+        }
+    };
+};
+
+
+
+var RES = {};
+function loadAll(arr, cb) {
+  var ok = 0;
+  for (var i = 0; i < arr.length; i++) {
+    var img = new Image();
+    img.src = 'img/' + arr[i]
+    img.key = arr[i]
+    img.onload = function() {
+      ok++;
+      RES[this.key] = this
+      if (ok >= arr.length) {
+        cb && cb()
+      }
+    }
+  }
+    
+}
+
+loadAll(['left.gif','right.gif', 'face.gif', 'mouth.gif', 'bg.gif'], function() {
+  Example.mixed();
+  var leftBtn = new Image();
+  leftBtn.src = "img/left.gif"
+  leftBtn.t = null;
+  leftBtn.onmousedown = leftBtn.ontouchstart = function() {
+    clearInterval(this.t)
+    this.t = setInterval(function() {
+      b.goLeft();
+    },  16)
+  }.bind(leftBtn)
+  leftBtn.onmouseup = leftBtn.ontouchend = function() {
+    clearInterval(this.t)
+    // b.goLeft(0);
+  }.bind(leftBtn)
+  leftBtn.style.cssText="position:absolute;left:10px;bottom:10px;"
+  document.body.appendChild(leftBtn)
+  var leftBtn = new Image();
+  leftBtn.src = "img/right.gif"
+  leftBtn.t = null;
+  leftBtn.onmousedown = leftBtn.ontouchstart = function() {
+    clearInterval(this.t)
+    this.t = setInterval(function() {
+      b.goRight();
+    },  16)
+  }.bind(leftBtn)
+  leftBtn.onmouseup = leftBtn.ontouchend = function() {
+    clearInterval(this.t)
+    // b.goRight(0);
+  }.bind(leftBtn)
+  leftBtn.style.cssText="position:absolute;right:10px;bottom:10px;"
+  document.body.appendChild(leftBtn)
+  var leftBtn = new Image();
+  leftBtn.src = "img/right.gif"
+  leftBtn.t = null;
+  leftBtn.onmousedown = leftBtn.ontouchstart = function() {
+    clearInterval(this.t)
+    var a = 0;
+    this.t = setInterval(function() {
+      a++;
+      if (a >= 5) {clearInterval(this.t)}
+      b.goUp();
+    }.bind(this),  16)
+  }.bind(leftBtn)
+  leftBtn.onmouseup = leftBtn.ontouchend = function() {
+    clearInterval(this.t)
+    // b.goRight(0);
+  }.bind(leftBtn)
+  leftBtn.style.cssText="position:absolute;right:10px;bottom:60px;transform:rotate(-90deg);"
+  document.body.appendChild(leftBtn)
+  var audio = new Audio();
+  audio.autoplay = true;
+  audio.src = "img/bg.mp3"
+  audio.play();
+})
+
+
+</script>
+</body>
+</html>
